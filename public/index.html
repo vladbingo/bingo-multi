@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0c14">
+<title>Bingo Royal — Plateforme Multijoueur</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div id="toast-wrap"></div>
+
+<!-- ══════════ ACCUEIL ══════════ -->
+<section id="scr-home" class="screen active">
+  <div class="hero">
+    <div class="crown">♛</div>
+    <h1 class="title">BINGO <span class="gold">ROYAL</span></h1>
+    <p class="subtitle">La plateforme de bingo en ligne · jusqu'à 100 joueurs · en direct</p>
+    <div class="hero-balls">
+      <span class="mini-ball b">B</span><span class="mini-ball i">I</span><span class="mini-ball n">N</span><span class="mini-ball g">G</span><span class="mini-ball o">O</span>
+    </div>
+  </div>
+
+  <div class="home-grid">
+    <div class="card panel">
+      <h2 class="panel-title">🎱 Créer une partie</h2>
+      <label class="field-label" for="in-pseudo">Ton pseudo</label>
+      <input id="in-pseudo" class="input" maxlength="16" placeholder="Ex. LeBoss" autocomplete="off">
+      <label class="field-label" for="in-gamename">Nom de la partie</label>
+      <input id="in-gamename" class="input" maxlength="30" placeholder="Ex. Bingo du vendredi" autocomplete="off">
+      <label class="field-label" for="in-adminpw">Mot de passe admin <span class="lock" title="Permet de reprendre les commandes admin depuis n'importe quel appareil">🔑</span></label>
+      <input id="in-adminpw" class="input" type="password" maxlength="32" placeholder="Ex. secret123" autocomplete="off">
+      <label class="field-label" for="in-cards">Tes cartes <span class="lock">(1 à 25)</span></label>
+      <input id="in-cards" class="input" type="number" min="1" max="25" value="2" inputmode="numeric">
+      <button id="btn-create" class="btn btn-gold btn-big">Créer la partie</button>
+      <p class="hint small">Tu seras l'administrateur : cagnottes, joueurs, tirages… tout se règle depuis ton panneau admin.</p>
+    </div>
+
+    <div class="card panel">
+      <h2 class="panel-title">🎟️ Rejoindre</h2>
+      <label class="field-label" for="in-code">Code de la partie</label>
+      <input id="in-code" class="input code-input" maxlength="6" placeholder="ABC123" autocomplete="off" autocapitalize="characters">
+      <button id="btn-join" class="btn btn-felt btn-big">Rejoindre</button>
+      <p class="hint small">Ouvre cette page sur ton téléphone, entre le code partagé par l'organisateur, et joue !</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SALON ══════════ -->
+<section id="scr-lobby" class="screen">
+  <header class="topbar panel">
+    <div>
+      <div class="topbar-title gold-text" id="lobby-gamename">Bingo Royal</div>
+      <div class="topbar-sub"><span id="lobby-count">1</span> joueur(s)</div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-mute" class="icon-btn" title="Son">🔊</button>
+      <button id="btn-leave-lobby" class="icon-btn" title="Quitter">✕</button>
+    </div>
+  </header>
+
+  <div class="card panel code-card">
+    <div class="field-label">Code de la partie — partage-le aux joueurs</div>
+    <div class="code-big gold-text" id="lobby-code">------</div>
+    <button id="btn-copy" class="btn btn-felt">📋 Copier le code</button>
+  </div>
+
+  <div class="card panel">
+    <div class="field-label">🏆 Cagnottes</div>
+    <div id="lobby-prizes" class="prize-table"></div>
+  </div>
+
+  <div class="card panel">
+    <div class="field-label">Joueurs</div>
+    <div id="player-list" class="player-list"></div>
+  </div>
+
+  <!-- Panneau admin -->
+  <div class="card panel admin-panel" id="admin-panel">
+    <div class="field-label admin-title">🔑 Panneau administrateur</div>
+    <div id="admin-login-row">
+      <p class="hint small">Connecte-toi en admin pour configurer la partie.</p>
+      <button id="btn-admin-login" class="btn btn-felt">🔑 Connexion admin</button>
+    </div>
+    <div id="admin-controls" class="hidden">
+      <div class="admin-grid">
+        <div>
+          <label class="field-label" for="cfg-gamename">Nom de la partie</label>
+          <input id="cfg-gamename" class="input" maxlength="30">
+        </div>
+        <div>
+          <label class="field-label" for="cfg-maxcards">Cartes max / joueur (1-25)</label>
+          <input id="cfg-maxcards" class="input" type="number" min="1" max="25" inputmode="numeric">
+        </div>
+        <div>
+          <label class="field-label" for="cfg-speed">Vitesse de tirage</label>
+          <select id="cfg-speed" class="input">
+            <option value="lent">Lent (8 s)</option>
+            <option value="normal">Normal (5 s)</option>
+            <option value="rapide">Rapide (3 s)</option>
+          </select>
+        </div>
+        <div>
+          <label class="toggle-row"><input type="checkbox" id="cfg-auto"><span class="toggle"></span>Tirage automatique</label>
+        </div>
+      </div>
+      <div class="field-label" style="margin-top:10px">💰 Cagnottes par palier</div>
+      <div class="admin-grid" id="cfg-prizes"></div>
+      <button id="btn-cfg-save" class="btn btn-gold" style="margin-top:10px">💾 Appliquer la configuration</button>
+      <div class="field-label" style="margin-top:14px">👥 Gérer les joueurs</div>
+      <div id="admin-player-list" class="player-list"></div>
+      <div class="field-label" style="margin-top:14px">📜 Historique des manches</div>
+      <div id="admin-history" class="history-list"></div>
+    </div>
+  </div>
+
+  <button id="btn-start" class="btn btn-gold btn-big hidden">🚀 Lancer la partie</button>
+  <p id="lobby-wait" class="hint">En attente de l'organisateur pour lancer la partie…</p>
+</section>
+
+<!-- ══════════ JEU ══════════ -->
+<section id="scr-game" class="screen">
+  <header class="topbar panel">
+    <div>
+      <div class="topbar-title gold-text" id="game-gamename">🎱</div>
+      <div class="topbar-sub"><span id="game-code"></span> · <span id="game-count">1</span> joueurs · <span id="game-drawn">0</span>/75 boules</div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-mute2" class="icon-btn" title="Son">🔊</button>
+      <button id="btn-leave-game" class="icon-btn" title="Quitter">✕</button>
+    </div>
+  </header>
+
+  <div id="spectator-banner" class="banner hidden">👀 Tu es spectateur — prochaine manche tu joues !</div>
+  <div id="paused-banner" class="banner hidden">⏸️ Partie en pause</div>
+  <div id="final-banner" class="banner hidden">🔥 Dernière chance — <span id="final-secs">15</span>s pour crier BINGO !</div>
+
+  <div class="card panel">
+    <div class="field-label">🏆 Paliers & cagnottes</div>
+    <div id="prize-track" class="prize-table"></div>
+  </div>
+
+  <div class="ball-stage panel">
+    <div id="current-ball" class="ball big">
+      <span class="ball-letter">?</span>
+      <span class="ball-number">–</span>
+    </div>
+    <div class="ball-meta">
+      <div class="field-label">Dernières boules</div>
+      <div id="history" class="history"></div>
+    </div>
+  </div>
+
+  <div id="host-controls" class="card panel hidden">
+    <div class="field-label">🎙️ Commandes <span class="lock">(hôte / admin)</span></div>
+    <div class="btn-row">
+      <button id="btn-draw" class="btn btn-gold">🎱 Tirer une boule</button>
+      <button id="btn-pause" class="btn btn-felt">⏸️ Pause</button>
+      <button id="btn-forceend" class="btn btn-danger hidden">⏹️ Terminer</button>
+    </div>
+  </div>
+
+  <div class="card panel">
+    <button id="board-toggle" class="board-toggle">📋 Tableau des 75 numéros <span id="board-arrow">▾</span></button>
+    <div id="board" class="board hidden"></div>
+  </div>
+
+  <div class="field-label section-label">Mes cartes</div>
+  <div id="my-cards" class="cards"></div>
+</section>
+
+<!-- ══════════ FIN ══════════ -->
+<section id="scr-end" class="screen">
+  <div class="end-card panel">
+    <div class="crown">♛</div>
+    <div id="end-emoji" class="end-emoji">🏆</div>
+    <h2 id="end-title" class="title gold-text">PARTIE TERMINÉE</h2>
+    <p id="end-sub" class="subtitle"></p>
+    <div class="btn-row center">
+      <button id="btn-replay" class="btn btn-gold hidden">🔁 Rejouer</button>
+      <button id="btn-home" class="btn btn-felt">🏠 Accueil</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ COMPTE À REBOURS ══════════ -->
+<div id="countdown-overlay" class="hidden">
+  <div id="countdown-num">5</div>
+  <div class="countdown-sub">La partie commence…</div>
+</div>
+
+<!-- ══════════ MODAL ADMIN ══════════ -->
+<div id="admin-modal" class="modal hidden">
+  <div class="modal-box panel">
+    <h3 class="gold-text">🔑 Connexion admin</h3>
+    <label class="field-label" for="in-admin-login-pw">Mot de passe administrateur</label>
+    <input id="in-admin-login-pw" class="input" type="password" placeholder="Mot de passe" autocomplete="off">
+    <div class="btn-row">
+      <button id="btn-admin-login-ok" class="btn btn-gold">Se connecter</button>
+      <button id="btn-admin-login-cancel" class="btn btn-felt">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

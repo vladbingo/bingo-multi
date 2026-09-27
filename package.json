@@ -1,0 +1,1 @@
+{"dependencies":{"express":"^4.19.2","ws":"^8.18.0"},"description":"Jeu de bingo multijoueur en ligne — jusqu'à 100 joueurs par partie, chacun sur son téléphone","engines":{"node":">=18"},"license":"MIT","main":"server.js","name":"bingo-multi","scripts":{"start":"node server.js","test":"node test/test.js"},"version":"1.0.0"}
